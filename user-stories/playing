@@ -1,0 +1,32 @@
+* 2 players
+
+  Player A opens game by id
+  Player B opens game by id
+
+  Player A's turn
+  inputs move
+
+  Player B's turn
+  inputs move
+
+  Checks win.
+
+
+  id:
+    phase 1:
+      One game.
+    phase 2:
+      One game per player.
+    phase 3:
+      Multiple games per player.
+
+  Player:
+    phase 1:
+      Player id in URL.
+    phase 2:
+      Player id in cookie.
+    phase 3:
+      player authentication
+
+  Player id:
+    Recognizing the player.
