@@ -7,4 +7,4 @@ A rust project for an online Tic Tac Toe game.
 
 Using Rust and React.
 
-The project is far from functional.
+The project is far from functional, but at least we pass the Clippy test^1.
