@@ -8,40 +8,50 @@ use game_logic::player;
 use game_logic::board::{Direction, Cord, GameBoard, Drawable};
 use self::rand::Rng;
 use std::sync::Arc;
+use std::collections::BTreeMap;
 
 #[derive(Debug,Clone)]
 pub struct GameSession{
+    game_id:u32,
     board:Board,
     round:usize,
-    players:Vec<Arc<player::Player>>,
+    players:BTreeMap<u32,Arc<player::Player>>,
 }
 
 impl GameSession{
     pub fn new(dim:usize) -> GameSession {
         GameSession{
+            game_id:0,
             board:Board::new(dim),
             round:0,
-            players:vec![],
+            players:BTreeMap::new(),
         }
     }
 
+    pub fn contains_player(&self,id:&u32)->bool{
+        self.players.contains_key(id)
+    }
+    
+    pub fn find_player(&self,id:&u32)->Option<&Arc<player::Player>>{
+        self.players.get(id)
+    }
+    
     pub fn reset(&mut self){
         self.board.clear();
         self.round = 0;
     }
-    pub fn get_dimension(& self)->usize{
+    pub fn get_dimension(&self)->usize{
             self.board.get_dimension()
     }
 
-    pub fn check_winning(& self)-> Option<Direction>{
+    pub fn check_winning(&self)-> Option<Direction>{
         self.board.check_winning()
     }
     pub fn attach_player(&mut self,player:Arc<player::Player>)->bool{
         let mut retval = false;
         if self.round==0 &&
-        !self.players.iter().find(|&x|x.get_id()==player.get_id()).is_some()
-        {
-            self.players.push(player);
+        !self.players.contains_key(player.get_id_ref()){
+            self.players.insert(player.get_id(),player);
             retval = true;
         }
         return retval;
@@ -81,7 +91,7 @@ impl GameSession{
     pub fn get_player_by_round(&self)->Arc<player::Player>{
 
         let playa = self.round % self.players.len();
-        self.players.get(playa).unwrap().clone()
+        self.players.get(&(playa as u32)).unwrap().clone()
 
     }
 
