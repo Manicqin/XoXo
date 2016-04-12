@@ -3,6 +3,10 @@ name = "xoxo_lib"
 version = "0.1.0"
 authors = ["manicqin <8845802>"]
 
+[build-dependencies]
+serde_codegen = { version = "*", optional = true }
+syntex = "^0.22.0"
+
 [dependencies]
 rustc-serialize = "0.3"
 rand = "0.3"
@@ -11,16 +15,20 @@ time = "*"
 rust-crypto="*"
 staticfile = "*"
 persistent = "*"
-#bodyparser = "*"
+bodyparser = "*"
+#router = { path = "/home/manicqin/Projects/rust/router" }
 router = "*"
 plugin = "*"
-#params = "*"
+params = "*"
 mount = "*"
 postgres = "0.11"
 diesel = "0.5.0"
 diesel_codegen = { version = "0.5.0", default-features = false, features = ["nightly", "postgres"] }
 dotenv = "0.8.0"
 dotenv_macros = "0.8.0"
+serde = "*"
+serde_json = "*"
+#serde_macros = "*"
 
 [dependencies.iron]
 version = "*"
