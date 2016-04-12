@@ -16,7 +16,6 @@ rust-crypto="*"
 staticfile = "*"
 persistent = "*"
 bodyparser = "*"
-#router = { path = "/home/manicqin/Projects/rust/router" }
 router = "*"
 plugin = "*"
 params = "*"
