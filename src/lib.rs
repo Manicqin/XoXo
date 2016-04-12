@@ -1,5 +1,8 @@
 #![feature(custom_derive, custom_attribute, plugin)]
 #![plugin(diesel_codegen, dotenv_macros)]
+//, serde_macros
+extern crate serde;
+extern crate serde_json;
 
 #[macro_use]
 extern crate diesel;
@@ -7,7 +10,7 @@ extern crate dotenv;
 
 extern crate iron;
 extern crate persistent;
-//extern crate bodyparser;
+extern crate bodyparser;
 extern crate rustc_serialize;
 
 extern crate time;
