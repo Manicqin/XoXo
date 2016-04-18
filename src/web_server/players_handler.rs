@@ -10,9 +10,11 @@ use iron::typemap::Key;
 use self::params::*;
 
 use game_logic::player::Player;
+
 use std::collections::HashMap;
 use web_utils::server_errors::*;
-
+                                       
+use web_server::game_sessions_handler::GameSessions;
 use std::error::Error;
 use std::fmt::{self, Debug};
 use std::sync::Arc;
@@ -121,7 +123,11 @@ impl BeforeMiddleware for PlayersHandlerAuthenticator {
 
 pub fn auhentcate_player<'a>(req: &'a mut Request) -> IronResult<Response> {
     println!("auhentcate_player");
-    Ok(Response::with((status::Ok, format!("{:?}",req))))
+    println!("{:?}",req.extensions.len());
+    
+    let lock = req.get::<persistent::State<GameSessions>>().unwrap();
+    let data = lock.write().unwrap();
+    Ok(Response::with((status::Ok, format!("{:?}",*data))))
 }
 
 pub fn add_player<'a>(req: &'a mut Request) -> IronResult<Response> {

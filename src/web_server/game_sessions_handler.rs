@@ -5,7 +5,7 @@ extern crate plugin;
 extern crate params;
 
 use iron::prelude::*;
-use iron::{Handler, status, BeforeMiddleware};
+use iron::{Handler, status, BeforeMiddleware, modifier};
 use iron::typemap::Key;
 use self::params::*;
 use std::sync::Arc;
@@ -15,29 +15,30 @@ use game_logic::game_session::GameSession;
 //game_session::GameSession;
 
 #[derive(Debug)]
-pub struct GamSessions{
+pub struct GameSessions{
     registry : Vec<Arc<GameSession>>,
 }
 pub struct GameSessionFinder;
 
 impl Key for GameSessionFinder { type Value = GameSessionFinder; }
-impl Key for GamSessions { type Value = GamSessions; }
+impl Key for GameSessions { type Value = GameSessions; }
 
-impl GamSessions{
+impl GameSessions{
     pub fn new()->Self{
-        GamSessions{registry:vec![] }
+        GameSessions{registry:vec![] }
     }
 
-    pub fn push(&mut self,session: GameSession){
-        self.registry.push(Arc::new(session));
+    pub fn push(&mut self,session: Arc<GameSession>){
+        self.registry.push(session);
     }
 
-    pub fn find_player_games(&self,player_id: u32)->Vec<&Arc<GameSession>>{
+    pub fn find_player_games(&self,player_id: u32)->Vec<Arc<GameSession>>{
         self.registry.iter()
-            .filter(|x| (**x).contains_player(&player_id))
+            .filter(|x| (x).contains_player(&player_id)).cloned()
             .collect::<Vec<_>>()
     }
 }
+
 impl Handler for GameSessionFinder{
     fn handle(&self, _:&mut Request)-> IronResult<Response>{
         println!("GameSessionFinder handle");
@@ -48,9 +49,13 @@ impl Handler for GameSessionFinder{
     }
 }
 
-// fn bla(req : & Request) ->  Params::Map {
-//     Params::Map::new()
-// }
+impl<'a,'b> modifier::Modifier<Request<'a, 'b>> for GameSessions
+{
+    fn modify(self, req: &mut Request) {
+        //res.headers.set(self.0);
+        req.extensions.insert::<GameSessions>(self);
+    }
+}
     
 impl BeforeMiddleware for GameSessionFinder {
         
@@ -59,7 +64,7 @@ impl BeforeMiddleware for GameSessionFinder {
        
         let map = req.get::<Params>().unwrap();
         
-        let lock = req.get::<persistent::State<GamSessions>>().unwrap();
+        let lock = req.get::<persistent::State<GameSessions>>().unwrap();
         let dynamic_asset = lock.read().unwrap();
         let game_id : _;
 
@@ -69,10 +74,14 @@ impl BeforeMiddleware for GameSessionFinder {
                 return Err(IronError::new(StringError("No gameid was given".to_string()), status::NotFound));},
         }
         
-        println!(",fhdskjfhjdfsh {:?}", *dynamic_asset);
+        let mut player_sessions = GameSessions::new();
+        
         for game in dynamic_asset.find_player_games(game_id).iter(){
             println!("{:?}",game);
+            player_sessions.push(game.clone());
         } 
+        req.set_mut(player_sessions);
+        
         
         Ok(())
     }

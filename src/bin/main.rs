@@ -22,7 +22,7 @@ use xoxo_lib::utils::config::{Config};
 use xoxo_lib::web_utils::*;
 use xoxo_lib::web_server::*;
 
-
+use std::sync::Arc;
 #[cfg(not(test))]
 fn main() {
 
@@ -55,12 +55,23 @@ fn main() {
      roster.add_player(player::Player::new(13));
      roster.add_player(player::Player::new(14));
 
-     let mut session = game_session::GameSession::new(3);
-     session.attach_player(roster.get(&10).unwrap());
-     session.attach_player(roster.get(&11).unwrap());
+     let mut session1 = game_session::GameSession::new(3);
+     session1.attach_player(roster.get(&10).unwrap());
+     session1.attach_player(roster.get(&11).unwrap());
 
-     let mut sessions = game_sessions_handler::GamSessions::new();
-     sessions.push(session);
+     let mut session2 = game_session::GameSession::new(3);
+     session2.attach_player(roster.get(&10).unwrap());
+     session2.attach_player(roster.get(&12).unwrap());
+     
+     let mut session3 = game_session::GameSession::new(3);
+     session3.attach_player(roster.get(&11).unwrap());
+     session3.attach_player(roster.get(&12).unwrap());
+     
+     
+     let mut sessions = game_sessions_handler::GameSessions::new();
+     sessions.push(Arc::new(session1));
+     sessions.push(Arc::new(session2));
+     sessions.push(Arc::new(session3));
 
       let mut main_router = Router::new();
       main_router.get("game/hello".to_string(), hello_world::HelloWorld::new("shit got real".to_string()));
@@ -69,7 +80,7 @@ fn main() {
       let mut main_chain = Chain::new(main_router);
 
       main_chain.link_before(persistent::State::<players_handler::PlayersHandler>::one(roster));
-      main_chain.link_before(persistent::State::<game_sessions_handler::GamSessions>::one(sessions));
+      main_chain.link_before(persistent::State::<game_sessions_handler::GameSessions>::one(sessions));
       main_chain.link_before(players_handler::PlayersHandlerAuthenticator);
       main_chain.link_before(game_sessions_handler::GameSessionFinder);
 

@@ -28,6 +28,7 @@ dotenv_macros = "0.8.0"
 serde = "*"
 serde_json = "*"
 #serde_macros = "*"
+redis = "0.5.2"
 
 [dependencies.iron]
 version = "*"
