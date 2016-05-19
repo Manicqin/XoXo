@@ -7,7 +7,7 @@
 	<port>6767</port>
 	<ip>127.0.0.1</ip>
 	<template_path>templates/template.tpl</template_path>
-	<scripts_path>/home/manicqin/Projects/rust/xoxo/scripts/</scripts_path>
-	<static_path>/home/manicqin/Projects/rust/xoxo/static-pages/</static_path>
+	<scripts_path>/home/manicqin/Projects/rust/xoxo_lib/scripts/</scripts_path>
+	<static_path>/home/manicqin/Projects/rust/xoxo_lib/static-pages/</static_path>
 	<log_level>1</log_level>
 </config>

@@ -185,19 +185,59 @@ impl Drawable for Board{
         }
     }
 
+    // fn make_html(&self)->String{
+    //     let mut retval = String::default();
+    //     for x in 0..self.dimension {
+    //         for y in 0..self.dimension {
+    //             match self.get(Cord::new(x as usize, y as usize)) {
+    //                 Ok(character) => {
+    //                                     retval = format!("{}    ({})",retval, character);
+    //                                 },
+    //                 _ => {retval = format!("{}  ",retval);},
+    //             }
+    //         }
+    //         retval = format!("{}</br>",retval);
+    //     }
+    //     retval
+    // }
+    
     fn make_draw(&self)->String{
-        let mut retval = String::default();
+        let mut retval = "[{".to_string();
+        retval.push_str(format!(" \"dim\":{},",self.get_dimension()).as_str());
+        retval.push_str("\"board\":[");
         for x in 0..self.dimension {
+            let mut row = "[".to_string();
             for y in 0..self.dimension {
                 match self.get(Cord::new(x as usize, y as usize)) {
                     Ok(character) => {
-                                        retval = format!("{}    ({})",retval, character);
+                                        row.push_str(format!("{}",character).as_str());
+                                        if y < self.dimension-1
+                                        {
+                                         row.push(',');   
+                                        }
                                     },
                     _ => {retval = format!("{}  ",retval);},
                 }
             }
-            retval = format!("{}</br>",retval);
+            row.push(']');
+            if x < self.dimension-1
+            {
+                row.push(',');
+            }
+            retval.push_str(row.as_str());
         }
+        retval.push_str("]}]");
         retval
     }
 }
+
+/*
+{
+	"dim": 3,
+	"board": [
+		[0, 0, 0],
+		[1, 0, 0],
+		[0, 0, 0]
+	]
+}
+*/

@@ -19,15 +19,19 @@ pub struct GameSession{
 }
 
 impl GameSession{
-    pub fn new(dim:usize) -> GameSession {
+    pub fn new(new_game_id:u32,dim:usize) -> GameSession {
         GameSession{
-            game_id:0,
+            game_id:new_game_id,
             board:Board::new(dim),
             round:0,
             players:BTreeMap::new(),
         }
     }
 
+    pub fn get_id(&self)->u32{
+        self.game_id    
+    }
+    
     pub fn contains_player(&self,id:&u32)->bool{
         self.players.contains_key(id)
     }
@@ -88,6 +92,13 @@ impl GameSession{
         self.board.check_winning()
     }
 
+    pub fn play_round(&mut self, cord: Cord, player_idx:usize)->Option<Direction>{
+        match self.board.get(cord.clone()){
+            Ok(_) => None,
+            _ => self.board.check_winning()
+        }
+        
+    }
     pub fn get_player_by_round(&self)->Arc<player::Player>{
 
         let playa = self.round % self.players.len();

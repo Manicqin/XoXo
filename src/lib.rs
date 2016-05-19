@@ -1,19 +1,24 @@
 #![feature(custom_derive, custom_attribute, plugin)]
 #![plugin(diesel_codegen, dotenv_macros)]
-//, serde_macros
-extern crate serde;
-extern crate serde_json;
+//#![plugin(diesel_codegen, dotenv_macros, serde_macros)]
+
+//extern crate serde_macros
+//extern crate serde;
+//extern crate serde_json;
 
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
 
+#[macro_use]
+extern crate mime;
 extern crate iron;
 extern crate persistent;
 extern crate bodyparser;
-extern crate rustc_serialize;
+//extern crate rustc_serialize;
 
 extern crate time;
+extern crate redis;
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;

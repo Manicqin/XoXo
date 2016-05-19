@@ -19,6 +19,8 @@ use std::error::Error;
 use std::fmt::{self, Debug};
 use std::sync::Arc;
 
+use redis::{Commands, PipelineCommands, transaction, Client};
+
 //Holds file and comments vector
 //loads file nad dump it into vector
 //keeps adding new comments into vector
@@ -121,32 +123,55 @@ impl BeforeMiddleware for PlayersHandlerAuthenticator {
 }
 
 
-pub fn auhentcate_player<'a>(req: &'a mut Request) -> IronResult<Response> {
-    println!("auhentcate_player");
-    println!("{:?}",req.extensions.len());
+pub fn authenticate_player<'a>(req: &'a mut Request) -> IronResult<Response> {
+    println!("authenticate_player");
     
-    let lock = req.get::<persistent::State<GameSessions>>().unwrap();
-    let data = lock.write().unwrap();
-    Ok(Response::with((status::Ok, format!("{:?}",*data))))
+    let map = req.get::<Params>().unwrap();
+    let mut player_nick_name = "Not Found".to_string();
+    
+    // general connection handling
+    let client = Client::open("redis://127.0.0.1/").unwrap();
+    let con = client.get_connection().unwrap();
+    
+    let player_id : _;
+
+    match map.find(&["user_id"]) {
+        Some(&Value::String(ref id)) => player_id = id,
+        _ => panic!("Unexpected parameter type!"),
+    }
+    
+    let mut key = format!("{}:{}","user_id", player_id);
+    let ret = con.exists(key.clone()).unwrap();
+    if ret{
+        key = format!("{}:{}:{}","user_id", player_id, "nick_name");
+        player_nick_name = con.get(key).unwrap();
+    }
+    Ok(Response::with((status::Ok, format!("Player {}",player_nick_name))))
 }
 
 pub fn add_player<'a>(req: &'a mut Request) -> IronResult<Response> {
     println!("add_player");
 
     let map = req.get::<Params>().unwrap();
-    let lock = req.get::<persistent::State<PlayersHandler>>().unwrap();
-    let mut dynamic_asset = lock.write().unwrap();
-    let player_id : _;
+    
+    // general connection handling
+    let client = Client::open("redis://127.0.0.1/").unwrap();
+    let con = client.get_connection().unwrap();
+    
+    let player_nick_name : _;
 
-    match map.find(&["userid"]) {
-        Some(&Value::String(ref id)) => player_id = id.parse::<u32>().unwrap_or(0),
+    match map.find(&["nick_name"]) {
+        Some(&Value::String(ref id)) => player_nick_name = id.to_string(),
         _ => panic!("Unexpected parameter type!"),
     }
-
-    if dynamic_asset.contains(&player_id) {
-        return Err(IronError::new(StringError("Duplicate player id".to_string()), status::NotFound));
-    }
-
-    dynamic_asset.add_player(Player::new(player_id));
+    
+    let players_count : isize = con.incr("player_count",1).unwrap();
+    
+    let mut key = format!("{}:{}","user_id", players_count);
+    let _ : () = con.set(key.clone(),0).unwrap();
+    
+    key = format!("{}:{}:{}","user_id", players_count,"nick_name");
+    let _ : () = con.set(key,player_nick_name).unwrap();
+    
     Ok(Response::with((status::Ok, "Added")))
 }
